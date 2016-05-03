@@ -218,13 +218,122 @@
 # 	GAME.new.play
 # end
 
+# class Code
+# 	attr_reader :pegs
+# 	PEGS = {"B" => :blue, "O" => :orange, "Y" => :yellow, "G" => :green, "P" =>:purple, "R" => :red}
+
+# 	def self.parse(string)
+# 		pegs = string.split("").collect do |i|
+# 			raise "parse error" unless PEGS.has_key?(i.upcase)
+# 			PEGS[i.upcase]
+# 		end
+# 		Code.new(pegs)
+# 	end
+
+# 	def self.random
+# 		pegs = []
+# 		4.times {pegs << PEGS.values.sample}
+# 		Code.new(pegs)
+# 	end
+
+# 	def initialize(pegs)
+# 		@pegs = pegs
+# 	end
+
+# 	def [](i)
+# 		pegs[i]
+# 	end
+
+# 	def exact_matches(other_code)
+# 		result = 0
+# 		pegs.each_index do |i|
+# 			result += 1 if self[i] == other_code[i]
+# 		end
+# 		result
+# 	end
+
+# 	def near_matches(other_code)
+# 		other_color_counts = other_code.color_count
+
+# 		result = 0
+# 		self.color_count.each do |color, count|
+# 			next unless other_color_counts.has_key?(color)
+# 				result += [count, other_color_counts[color]].min
+# 			end
+# 		result - self.exact_matches(other_code)
+# 	end
+
+# 	def color_count
+# 		result = Hash.new(0)
+
+# 		pegs.each do |i|
+# 			result[i] += 1
+# 		end
+# 		result
+# 	end
+
+# 	def ==(other_code)
+# 		return false unless other_code.is_a?(Code)
+# 		self.pegs == other_code.pegs
+# 	end
+
+# end
+
+
+# class Game
+# 	Max_turns = 10
+# 	attr_reader :secret_code
+
+# 	def initialize(secret_code=Code.random)
+# 		@secret_code = secret_code
+# 	end
+
+# 	def play
+
+# 		Max_turns.times do 
+# 			guess = get_guess
+
+# 			if guess == secret_code
+# 				puts 'you are winner'
+# 				return
+# 			end
+
+# 			display_matches(guess)
+# 		end
+# 		puts "lost"
+# 	end
+
+# 	def get_guess
+# 		puts "Guess the code:"
+# 		begin
+# 			Code.parse(gets.chomp)
+# 		rescue
+# 			puts "error parsing code"
+# 			retry
+# 		end
+# 	end
+
+# 	def display_matches(guess)
+# 		exact_matches = @secret_code.exact_matches(guess)
+# 		near_matches = @secret_code.near_matches(guess)
+# 		puts "Ypou have #{exact_matches} exact_matches"
+# 		puts "You ahve #{near_matches} near_matches"
+
+# 	end
+# end
+
+# if $PROGRAM_NAME == __FILE__
+# 	Game.new.play
+# end
+
 class Code
 	attr_reader :pegs
-	PEGS = {"B" => :blue, "O" => :orange, "Y" => :yellow, "G" => :green, "P" =>:purple, "R" => :red}
 
+	PEGS = {"G" => :green, "R" => :red, "Y" => :yellow, "O" => :orange, "B" => :blue, "P" => :purple}
+	
 	def self.parse(string)
 		pegs = string.split("").collect do |i|
-			raise "parse error" unless PEGS.has_key?(i.upcase)
+			raise "error" unless PEGS.has_key?(i.upcase)
 			PEGS[i.upcase]
 		end
 		Code.new(pegs)
@@ -232,7 +341,7 @@ class Code
 
 	def self.random
 		pegs = []
-		4.times {pegs << PEGS.values.sample}
+		4.times {pegs << PEGS.keys.sample}
 		Code.new(pegs)
 	end
 
@@ -247,15 +356,15 @@ class Code
 	def exact_matches(other_code)
 		result = 0
 		pegs.each_index do |i|
-			result += 1 if self[i] == other_code[i]
+			result += 1 if pegs[i] == other_code[i]
 		end
 		result
 	end
 
 	def near_matches(other_code)
+		result = 0
 		other_color_counts = other_code.color_count
 
-		result = 0
 		self.color_count.each do |color, count|
 			next unless other_color_counts.has_key?(color)
 				result += [count, other_color_counts[color]].min
@@ -265,8 +374,7 @@ class Code
 
 	def color_count
 		result = Hash.new(0)
-
-		@pegs.each do |i|
+		pegs.each do |i|
 			result[i] += 1
 		end
 		result
@@ -276,39 +384,34 @@ class Code
 		return false unless other_code.is_a?(Code)
 		self.pegs == other_code.pegs
 	end
-
 end
 
-
 class Game
-	Max_turns = 10
 	attr_reader :secret_code
+	Max_turns = 10
 
-	def initialize(secret_code=Code.random)
+	def initialize(secret_code = Code.random)
 		@secret_code = secret_code
 	end
 
 	def play
-
-		Max_turns.times do 
+		Max_turns.times do
 			guess = get_guess
-
 			if guess == @secret_code
-				puts 'you are winner'
+				puts "you win"
 				return
 			end
-
 			display_matches(guess)
 		end
 		puts "lost"
 	end
 
 	def get_guess
-		puts "Guess the code:"
+		puts "Make a guess code"
 		begin
 			Code.parse(gets.chomp)
 		rescue
-			puts "error parsing code"
+			puts "error parsiing code"
 			retry
 		end
 	end
@@ -316,18 +419,10 @@ class Game
 	def display_matches(guess)
 		exact_matches = @secret_code.exact_matches(guess)
 		near_matches = @secret_code.near_matches(guess)
-		puts "Ypou have #{exact_matches} exact_matches"
-		puts "You ahve #{near_matches} near_matches"
-
+		puts "you got #{exact_matches} exact matches"
+		puts "ypu got #{near_matches} near matches"
 	end
 end
-
-if $PROGRAM_NAME == __FILE__
-	Game.new.play
-end
-
-
-
 
 
 
